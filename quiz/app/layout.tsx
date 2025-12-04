@@ -27,6 +27,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <nav className="w-full border h-[50px] ">
+          <h1 className="font-bold text-2xl text-">Quiz App</h1>{" "}
+        </nav>
+
         {children}
       </body>
     </html>
