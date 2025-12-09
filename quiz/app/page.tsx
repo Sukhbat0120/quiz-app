@@ -3,14 +3,15 @@ import { useState } from "react";
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [textUrl, setTextUrl] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const generateImage = async () => {
-    if (!prompt.trim()) return;
+  const generate = async () => {
+    const trimmed = prompt.trim();
+    if (!trimmed) return;
 
     setLoading(true);
-    setImageUrl("");
+    setTextUrl("");
 
     try {
       const response = await fetch("/api/gemini", {
@@ -18,16 +19,16 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt: trimmed }),
       });
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        setImageUrl(url);
-      } else {
-        console.error("Failed to generate image");
+      if (!response.ok) {
+        console.error("Request failed");
+        return;
       }
+
+      const text = await response.text();
+      setTextUrl(text);
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -48,13 +49,13 @@ export default function Home() {
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && generateImage()}
+            onKeyDown={(e) => e.key === "Enter" && generate()}
             placeholder="Enter a title for your article..."
             className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
           <button
-            onClick={generateImage}
+            onClick={generate}
             disabled={loading || !prompt.trim()}
             className="w-full px-6 py-3 bg-sky-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
           >
@@ -62,9 +63,9 @@ export default function Home() {
           </button>
         </div>
 
-        {imageUrl && (
+        {textUrl && (
           <div className="mt-8 border rounded-lg p-4">
-            <img src={imageUrl} alt="Generated" className="w-full rounded-lg" />
+            <p>{textUrl}</p>
           </div>
         )}
       </div>
